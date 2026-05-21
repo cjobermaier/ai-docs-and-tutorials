@@ -25,6 +25,7 @@ export default defineConfig({
 						{ label: 'Verify URLs', slug: 'tutorials/link-checker' },
 						{ label: 'Validate code examples', slug: 'tutorials/validate-code-examples' },
 							{ label: 'Create for a target audience', slug: 'tutorials/create-for-a-target-audience' },
+							{ label: 'Measure content improvement', slug: 'tutorials/measure-content-improvement' },
 					],
 				},
 				{
