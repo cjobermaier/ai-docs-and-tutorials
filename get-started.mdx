@@ -1,0 +1,32 @@
+---
+title: Set up your environment
+description: "Set up a CLAUDE.md or AGENTS.md in your docs repo before starting tutorials."
+---
+
+Before running any tutorial, you need two things: AI instructions in your repository, and the demo files to practice with.
+
+## AI instructions
+
+The tutorials use instructions in a `CLAUDE.md` (for Claude Code) or `AGENTS.md` (for other assistants) file at the root of your repository. This file tells the AI what role to play and what it has permission to do.
+
+Create a `CLAUDE.md` at the root of the repository you want to work in and add:
+
+```md
+You are a technical writing assistant. Help improve documentation accuracy, clarity, and completeness. Do not rewrite content from scratch — make targeted improvements only.
+```
+
+Adjust to match your own project's needs.
+
+## Download skill files
+
+The tutorials use Claude Code skill files that give Claude specialized capabilities — like searching indexed documentation or fetching URLs.
+
+Download and install them now, or follow the setup steps in any tutorial that requires them:
+
+- **[Set up Grounded Docs](/guides/setup-grounded-docs)** — required for fact-checking tutorials
+
+## Download the demo repository
+
+You can run the tutorials against your own documentation repository. Alternatively, use the demo files included in this project under `public/examples/`.
+
+The tutorials reference these demo files by path (e.g. `public/examples/react-18-forwardref-tutorial.md`), so no extra setup is needed if you clone this repository.

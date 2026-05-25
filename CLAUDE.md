@@ -4,31 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-A tutorial and documentation website teaching users how to use AI (primarily Claude) to improve their technical documents and tutorials. Built with Astro + Starlight. Deploys to Fly.io.
+A tutorial and documentation website teaching users how to use AI (primarily Claude) to improve their technical documents and tutorials. Built with Mintlify. Deployed via Mintlify's platform (tutorialguides.mintlify.app).
 
-## Commands
+## Local development
 
-Node is managed via nvm. Prefix commands with `export PATH="$HOME/.nvm/versions/node/v24.14.0/bin:$PATH" &&` if node/npm are not on PATH.
+Install the Mintlify CLI once:
 
 ```bash
-npm run dev      # start local dev server at localhost:4321
-npm run build    # production build (outputs to dist/)
-npm run preview  # preview the production build locally
+npm install -g mintlify
+```
+
+Then run the dev server:
+
+```bash
+mintlify dev     # starts local preview at localhost:3000
 ```
 
 ## Architecture
 
-Astro + Starlight. All content lives in `src/content/docs/` as Markdown or MDX files.
+Mintlify docs site. All content lives at the repo root as `.mdx` files. Navigation and theme are configured in `mint.json`.
 
 **Content structure:**
-- `src/content/docs/index.mdx` — home/splash page
-- `src/content/docs/guides/` — conceptual guides (manually listed in sidebar)
-- `src/content/docs/tutorials/` — step-by-step tutorials (auto-generated in sidebar)
+- `introduction.mdx` — home/landing page
+- `get-started.mdx` — environment setup
+- `guides/` — conceptual guides
+- `tutorials/` — step-by-step tutorials
+- `public/examples/` — demo files referenced by tutorials
 
-**Sidebar** is configured in `astro.config.mjs`. Guides are listed manually — adding a new guide file requires a matching entry in the sidebar config. Tutorials use `autogenerate` (wrapped in an `items` array per Starlight v0.39+ syntax) so new files appear automatically.
+**Navigation** is manually configured in `mint.json` under the `navigation` array. Adding a new page requires a matching entry there.
 
-**Frontmatter** required on every content file: `title` and `description`. The home page uses `template: splash` for the full-width hero layout.
+**Frontmatter** required on every content file: `title` and `description`.
 
-**Components:** Starlight's built-in components (`Card`, `CardGrid`, etc.) are available in `.mdx` files via `import { Card, CardGrid } from '@astrojs/starlight/components'`.
+**Mintlify components** available in `.mdx` files without any import:
+- `<Card>`, `<CardGroup>` — feature cards
+- `<Steps>`, `<Step>` — numbered step sequences
+- `<Note>`, `<Tip>`, `<Warning>`, `<Check>` — callout blocks
+- `<Tabs>`, `<Tab>` — tabbed content
+- `<Accordion>`, `<AccordionGroup>` — collapsible sections
+- `<CodeGroup>` — multiple code blocks with tabs
 
-Deployment target: Fly.io (config to be added).
+**Deployment:** Push to the connected GitHub repo. Mintlify auto-deploys on every push to the default branch.

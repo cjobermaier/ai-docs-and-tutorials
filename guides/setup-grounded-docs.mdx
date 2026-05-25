@@ -1,0 +1,75 @@
+---
+title: Set up Grounded Docs
+description: "Install and configure the Grounded Docs documentation indexer and Claude skills so you can fact-check content against specific documentation versions."
+---
+
+Several tutorials on this site use [Grounded Docs](https://grounded.tools/) to fact-check content against specific documentation versions. Complete this setup once and then skip it in any tutorial that links here.
+
+## Prerequisites
+
+<CardGroup cols={3}>
+  <Card title="npm" icon="npm">
+    Node package manager for installing the CLI
+  </Card>
+  <Card title="git" icon="code-branch">
+    Required to clone the skills repository
+  </Card>
+  <Card title="Claude Code" icon="terminal">
+    With a CLAUDE.md or AGENTS.md — see [Set up your environment](/get-started)
+  </Card>
+</CardGroup>
+
+## Steps
+
+<Steps>
+  <Step title="Install the Grounded Docs CLI">
+    Install the Grounded Docs CLI globally:
+
+    ```shell
+    npm install -g @arabold/docs-mcp-server
+    ```
+  </Step>
+  <Step title="Install the Claude skills">
+    The Grounded Docs repository ships three Claude skills. Install them so Claude knows how to index and search documentation on your behalf.
+
+    ```shell
+    git clone --depth 1 --filter=blob:none --sparse \
+      https://github.com/arabold/docs-mcp-server.git /tmp/docs-mcp-server
+    cd /tmp/docs-mcp-server && git sparse-checkout set skills
+
+    mkdir -p ~/.claude/skills/docs-manage \
+             ~/.claude/skills/docs-search \
+             ~/.claude/skills/fetch-url
+
+    cp /tmp/docs-mcp-server/skills/docs-manage/SKILL.md \
+       ~/.claude/skills/docs-manage/SKILL.md
+    cp /tmp/docs-mcp-server/skills/docs-search/SKILL.md \
+       ~/.claude/skills/docs-search/SKILL.md
+    cp /tmp/docs-mcp-server/skills/fetch-url/SKILL.md \
+       ~/.claude/skills/fetch-url/SKILL.md
+
+    rm -rf /tmp/docs-mcp-server
+    ```
+
+    Each skill teaches Claude a different capability:
+
+    | Skill | What Claude can do |
+    | --- | --- |
+    | `docs-manage` | Scrape, refresh, and remove documentation from the local index |
+    | `docs-search` | List indexed libraries, search content, and fact-check against indexed docs |
+    | `fetch-url` | Fetch a single URL and convert it to Markdown without indexing it |
+  </Step>
+  <Step title="Verify the install">
+    Ask Claude to list any currently indexed libraries:
+
+    ```
+    /docs-search List everything in the docs index
+    ```
+
+    If Grounded Docs is installed correctly, Claude will run the `list` command and return a table of indexed libraries (or confirm the index is empty if nothing has been scraped yet).
+  </Step>
+</Steps>
+
+<Check>
+  You're ready. Return to the tutorial that sent you here.
+</Check>

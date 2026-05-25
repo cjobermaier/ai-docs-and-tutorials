@@ -1,0 +1,121 @@
+---
+title: Increase content accuracy
+description: "Use Grounded Docs to index specific documentation versions and fact-check tutorials against them with Claude."
+---
+
+Asking your AI to review your content for accuracy can give mixed results — the AI may use training data that doesn't reflect the specific library version your readers are targeting. Giving your AI a precise, versioned source to check against fixes this.
+
+This tutorial shows how to use [Grounded Docs](https://grounded.tools/) to index the React reference docs, fact-check a tutorial against them, find a real breaking change, fix the file, and verify the result.
+
+## Prerequisites
+
+<CardGroup cols={2}>
+  <Card title="Set up your environment" icon="screwdriver-wrench" href="/get-started">
+    You need a CLAUDE.md or AGENTS.md file in your repo before starting.
+  </Card>
+  <Card title="Set up Grounded Docs" icon="database" href="/guides/setup-grounded-docs">
+    Grounded Docs must be installed and the Claude skills must be in place.
+  </Card>
+</CardGroup>
+
+## The example file
+
+This tutorial uses a sample React tutorial as its subject. Open it at `public/examples/react-18-forwardref-tutorial.md`. It covers forwarding refs to child components — a common pattern in React 18 that changed in React 19.
+
+The key code in that file:
+
+```jsx
+import { forwardRef } from 'react';
+
+const FancyInput = forwardRef(function FancyInput(props, ref) {
+  return <input ref={ref} className="fancy-input" {...props} />;
+});
+```
+
+And this claim at the bottom:
+
+> "This pattern is required any time you need a parent to imperatively control a DOM node inside a child component."
+
+You will use Grounded Docs to check whether those claims are accurate against the React 19 docs.
+
+## Steps
+
+<Steps>
+  <Step title="Index the React documentation">
+    Use the `docs-manage` skill to scrape and index the React reference docs:
+
+    ```
+    /docs-manage Index the React reference documentation from https://react.dev/reference/react at version 19.2
+    ```
+
+    Claude will crawl the React docs site and store the indexed content locally. Allow each permission prompt as it runs — indexing takes a few minutes and covers roughly 50 pages.
+
+    When it finishes, confirm the index is ready:
+
+    ```
+    Give me a list of the react docs versions
+    ```
+
+    You should see:
+
+    | Library | Version | Pages |
+    |---------|---------|-------|
+    | react | 19.2 | 49 |
+  </Step>
+  <Step title="Fact-check the tutorial">
+    Ask Claude to check every claim in the example file against the indexed docs:
+
+    ```
+    /docs-search Fact-check public/examples/react-18-forwardref-tutorial.md
+    against the react 19.2 documentation. Flag any claims that are
+    inaccurate or outdated.
+    ```
+
+    Claude searches the index for each claim and returns citation blocks — one per finding:
+
+    ```
+    Doc path (local): /reference/react/forwardRef
+    Public URL:       https://react.dev/reference/react/forwardRef
+    Quote:            "If you use React 19 or higher, forwardRef is no longer
+                      required and will be deprecated in a future release."
+    Finding:          [DOCS SAY] forwardRef is deprecated in React 19; ref can
+                      now be passed as a regular prop.
+    ```
+
+    <Note>
+      The `[DOCS SAY]` label means the finding is backed by a verbatim quote from the indexed source — not the AI's training data or a guess. The doc path tells you exactly which page in the React docs the quote came from.
+    </Note>
+  </Step>
+  <Step title="Fix the tutorial">
+    Ask Claude to update the file using the indexed docs as the authoritative source:
+
+    ```
+    Using the react 19.2 docs, fix the deprecated usage in
+    public/examples/react-18-forwardref-tutorial.md.
+    ```
+
+    Claude will rewrite the component to use the React 19 pattern:
+
+    ```jsx
+    function FancyInput({ ref, ...props }) {
+      return <input ref={ref} className="fancy-input" {...props} />;
+    }
+    ```
+
+    It will also remove the `forwardRef` import and wrapper, update the surrounding explanation to describe `ref` as a regular prop, and remove the claim that `forwardRef` is required.
+
+    <Tip>
+      Review the diff before accepting. Claude should only be touching the deprecated patterns — not rewriting the whole file.
+    </Tip>
+  </Step>
+  <Step title="Verify the fix">
+    Run the fact-check one more time to confirm no issues remain:
+
+    ```
+    /docs-search Fact-check public/examples/react-18-forwardref-tutorial.md
+    against the react 19.2 documentation.
+    ```
+
+    All findings should now come back `[DOCS SAY]` with no deprecation warnings. The tutorial is accurate and ready to publish.
+  </Step>
+</Steps>
