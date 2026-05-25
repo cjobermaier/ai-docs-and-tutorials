@@ -8,14 +8,14 @@
     "dark": "#4f46e5"
   },
   "topbarCtaButton": {
-    "name": "Get started",
-    "url": "/get-started"
+    "name": "First tutorial",
+    "url": "/tutorials/increase-content-accuracy"
   },
   "navigation": {
     "groups": [
       {
         "group": "Getting started",
-        "pages": ["introduction", "get-started", "guides/setup-grounded-docs"]
+        "pages": ["introduction", "guides/setup-grounded-docs"]
       },
       {
         "group": "Tutorials",
