@@ -3,23 +3,23 @@ title: Set up Grounded Docs
 description: "Install and configure the Grounded Docs documentation indexer and Claude skills so you can fact-check content against specific documentation versions."
 ---
 
-Several tutorials on this site use [Grounded Docs](https://grounded.tools/) to fact-check content against specific documentation versions. Complete this setup once and then skip it in any tutorial that links here.
+[Grounded Docs](https://grounded.tools/) is a local documentation indexer that lets you scrape, store, and search versioned documentation on your own machine. Several tutorials on this site use it to fact-check content against specific documentation versions. Complete this setup once and skip it in any tutorial that links here.
 
 ## Prerequisites
 
 <CardGroup cols={3}>
-  <Card title="npm" icon="npm">
-    Node package manager for installing the CLI
+  <Card title="Node.js 22+" icon="node-js">
+    Required for the Grounded Docs CLI. Includes npm.
   </Card>
   <Card title="git" icon="code-branch">
     Required to clone the skills repository
   </Card>
   <Card title="Claude Code" icon="terminal">
-    With a CLAUDE.md or AGENTS.md — see [Set up your environment](/get-started)
+    With a CLAUDE.md or AGENTS.md in your project
   </Card>
 </CardGroup>
 
-## Steps
+## Install Grounded Docs
 
 <Steps>
   <Step title="Install the Grounded Docs CLI">
@@ -30,26 +30,71 @@ Several tutorials on this site use [Grounded Docs](https://grounded.tools/) to f
     ```
   </Step>
   <Step title="Install the Claude skills">
-    The Grounded Docs repository ships three Claude skills. Install them so Claude knows how to index and search documentation on your behalf.
+    The Grounded Docs repository ships three Claude skills. Install them so Claude knows how to index and search documentation on your behalf. The command below uses a sparse checkout to grab just the `skills/` directory, not the full repo.
 
-    ```shell
-    git clone --depth 1 --filter=blob:none --sparse \
-      https://github.com/arabold/docs-mcp-server.git /tmp/docs-mcp-server
-    cd /tmp/docs-mcp-server && git sparse-checkout set skills
+    <Warning>
+      If you've run this setup before and customized any SKILL.md files (for example, the fact-check enhancement from the [versioned-docs tutorial](/tutorials/increase-content-accuracy)), back them up first — the copy commands below overwrite without asking.
 
-    mkdir -p ~/.claude/skills/docs-manage \
-             ~/.claude/skills/docs-search \
-             ~/.claude/skills/fetch-url
+      <Tabs>
+        <Tab title="macOS / Linux / WSL">
+          ```bash
+          cp -r ~/.claude/skills ~/.claude/skills.backup
+          ```
+        </Tab>
+        <Tab title="Windows PowerShell">
+          ```powershell
+          Copy-Item -Recurse $env:USERPROFILE\.claude\skills $env:USERPROFILE\.claude\skills.backup
+          ```
+        </Tab>
+      </Tabs>
+    </Warning>
 
-    cp /tmp/docs-mcp-server/skills/docs-manage/SKILL.md \
-       ~/.claude/skills/docs-manage/SKILL.md
-    cp /tmp/docs-mcp-server/skills/docs-search/SKILL.md \
-       ~/.claude/skills/docs-search/SKILL.md
-    cp /tmp/docs-mcp-server/skills/fetch-url/SKILL.md \
-       ~/.claude/skills/fetch-url/SKILL.md
+    <Tabs>
+      <Tab title="macOS / Linux / WSL">
+        ```bash
+        git clone --depth 1 --filter=blob:none --sparse \
+          https://github.com/arabold/docs-mcp-server.git /tmp/docs-mcp-server
+        cd /tmp/docs-mcp-server && git sparse-checkout set skills
 
-    rm -rf /tmp/docs-mcp-server
-    ```
+        mkdir -p ~/.claude/skills/docs-manage \
+                 ~/.claude/skills/docs-search \
+                 ~/.claude/skills/fetch-url
+
+        cp /tmp/docs-mcp-server/skills/docs-manage/SKILL.md \
+           ~/.claude/skills/docs-manage/SKILL.md
+        cp /tmp/docs-mcp-server/skills/docs-search/SKILL.md \
+           ~/.claude/skills/docs-search/SKILL.md
+        cp /tmp/docs-mcp-server/skills/fetch-url/SKILL.md \
+           ~/.claude/skills/fetch-url/SKILL.md
+
+        # clean up the temp clone
+        rm -rf /tmp/docs-mcp-server
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        git clone --depth 1 --filter=blob:none --sparse `
+          https://github.com/arabold/docs-mcp-server.git $env:TEMP\docs-mcp-server
+        Set-Location $env:TEMP\docs-mcp-server
+        git sparse-checkout set skills
+
+        New-Item -ItemType Directory -Force -Path `
+          $env:USERPROFILE\.claude\skills\docs-manage, `
+          $env:USERPROFILE\.claude\skills\docs-search, `
+          $env:USERPROFILE\.claude\skills\fetch-url
+
+        Copy-Item $env:TEMP\docs-mcp-server\skills\docs-manage\SKILL.md `
+          $env:USERPROFILE\.claude\skills\docs-manage\SKILL.md
+        Copy-Item $env:TEMP\docs-mcp-server\skills\docs-search\SKILL.md `
+          $env:USERPROFILE\.claude\skills\docs-search\SKILL.md
+        Copy-Item $env:TEMP\docs-mcp-server\skills\fetch-url\SKILL.md `
+          $env:USERPROFILE\.claude\skills\fetch-url\SKILL.md
+
+        # clean up the temp clone
+        Remove-Item -Recurse -Force $env:TEMP\docs-mcp-server
+        ```
+      </Tab>
+    </Tabs>
 
     Each skill teaches Claude a different capability:
 
@@ -62,7 +107,7 @@ Several tutorials on this site use [Grounded Docs](https://grounded.tools/) to f
   <Step title="Verify the install">
     Ask Claude to list any currently indexed libraries:
 
-    ```
+    ```text
     /docs-search List everything in the docs index
     ```
 
@@ -71,5 +116,5 @@ Several tutorials on this site use [Grounded Docs](https://grounded.tools/) to f
 </Steps>
 
 <Check>
-  You're ready. Return to the tutorial that sent you here.
+  You're ready. Return to the tutorial that sent you here, or start with [Fact-check tutorials with versioned docs](/tutorials/increase-content-accuracy).
 </Check>
