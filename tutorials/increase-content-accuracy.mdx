@@ -1,6 +1,6 @@
 ---
 title: Fact-check tutorials with versioned docs
-description: "Use Grounded Docs to index versioned documentation, fact-check tutorials with Claude, and catch deprecated code using verbatim quotes and source URLs."
+description: "Use Grounded Docs to index versioned documentation, fact-check your tutorials with Claude, and catch deprecated code using verbatim quotes and source URLs."
 ---
 
 AI can review your code, documents, and tutorials for inaccuracies.
@@ -23,13 +23,13 @@ You have little visibility into the source, so you can't be sure it's using accu
 
 For example, you could ask Claude: 
 
-```text
+```plaintext
 Hey Claude, review my React tutorial for accuracy.
 ```
 
 And Claude confidently replies:
 
-```text
+```plaintext
 Looks good! The forwardRef pattern is correct — wrapping your component
 lets the parent access the child's DOM node. The useRef(null)
 initialization is right, and the overall approach follows React best
@@ -68,7 +68,7 @@ When you provide versioned documentation to your AI, it can fact-check content a
     
     In the Claude Code terminal, initialize Claude so it's aware of the tutorial file:
 
-    ```text
+    ```plaintext
     /init
     ```
   </Step>
@@ -89,7 +89,7 @@ The `/docs-manage` skill can index documentation. Use the `/docs-manage` skill t
     
     Run the following command to have Claude index two versions of the React documentation:
 
-    ```text
+    ```plaintext
     /docs-manage Index the following two versions of the React documentation:
     - https://18.react.dev/reference/react --version 18.3.1
     - https://react.dev/reference/react --version 19.2.0
@@ -104,7 +104,7 @@ The `/docs-manage` skill can index documentation. Use the `/docs-manage` skill t
   <Step title="Verify both versions are indexed">
     Confirm both versions are ready:
 
-    ```text
+    ```plaintext
     Use the /docs-search skill to list the React documentation versions.
     ```
 
@@ -135,7 +135,7 @@ For example, you could search for "forwardRef accepts a render function with two
   <Step title="Fact-check against React 18.3.1">
     Run the `/docs-search` skill to fact-check the tutorial against the React 18.3.1 docs:
 
-    ```text
+    ```plaintext
     Use the /docs-search skill to fact-check
     react-18-forwardref-tutorial.md
     against the react 18.3.1 documentation.
@@ -143,7 +143,7 @@ For example, you could search for "forwardRef accepts a render function with two
 
     Claude returns multiple findings with citations from the React 18.3.1 docs. The `forwardRef` pattern is valid in React 18, so it passes:
 
-    ```text
+    ```plaintext
     Doc path (local): /reference/react/forwardRef
     Public URL:       https://18.react.dev/reference/react/forwardRef
     Quote:            "forwardRef lets your component expose a DOM node
@@ -169,7 +169,7 @@ For example, you could search for "forwardRef accepts a render function with two
 
     Run the same check against the newer React 19 docs:
 
-    ```text
+    ```plaintext
     Use the /docs-search skill to fact-check
     react-18-forwardref-tutorial.md
     against the react 19.2.0 documentation.
@@ -181,7 +181,7 @@ For example, you could search for "forwardRef accepts a render function with two
     and Doc path point to the location in the React 19.2.0 docs where the deprecation is mentioned. You can 
     click the URL and manually fact-check to confirm the finding:
 
-    ```text
+    ```plaintext
     Doc path (local): /reference/react/forwardRef
     Public URL:       https://react.dev/reference/react/forwardRef
     Quote:            "In React 19, forwardRef is no longer necessary.
@@ -217,7 +217,7 @@ For example, you could search for "forwardRef accepts a render function with two
   <Step title="Update the file">
     Ask Claude to update the file using the React 19 docs as the authoritative source:
 
-    ```text
+    ```plaintext
     Update the tutorial to fix the deprecated `forwardRef` usage,
     using the React 19.2.0 docs.
     ```
@@ -247,7 +247,7 @@ For example, you could search for "forwardRef accepts a render function with two
   <Step title="Verify the fix">
     Re-run the fact-check against React 19.2.0 to confirm the deprecation warning is gone:
 
-    ```text
+    ```plaintext
     Use the /docs-search skill to fact-check
     react-18-forwardref-tutorial.md for the deprecated `forwardRef` you just fixed, 
     against the react 19.2.0 documentation.
@@ -255,7 +255,7 @@ For example, you could search for "forwardRef accepts a render function with two
 
     Claude shows the `forwardRef` claim with a new citation from the React 19.2.0 docs that confirms the fix:
 
-    ```text
+    ```plaintext
     Doc path (local): /reference/react/forwardRef.md
     Public URL:       https://react.dev/reference/react/forwardRef.md
     Quote:            "In React 19, `forwardRef` is no longer necessary. Pass

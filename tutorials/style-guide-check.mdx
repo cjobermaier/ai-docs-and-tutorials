@@ -1,6 +1,6 @@
 ---
 title: Check your docs against a style guide
-description: "Index a style guide into Grounded Docs, install two skills, and use them to catch style violations in your content."
+description: "Use Claude to check your docs against a style guide. Index the HashiCorp style guide into Grounded Docs, install two skills, and catch every style violation."
 ---
 
 Using a style guide for your documents and tutorials keeps your content consistent and easier for your users to follow. 
@@ -8,8 +8,8 @@ When you manually check your content against a style guide, you might catch some
 
 This tutorial shows you how to give Claude a style guide so its feedback is grounded in actual rules, not general writing preferences.
 
-You index the HashiCorp style guide into Grounded Docs, install two skills that know how to run checks against it,
-and then run a check on a document with intentional violations. You have Claude identify every violation,
+You index the HashiCorp style guide into Grounded Docs, a local documentation indexer, and install two skills that know how to run checks against it.
+Then you run a check on a document with intentional violations and have Claude identify every violation,
 explain the rule it breaks, and suggest a fix.
 
 ## When to use each skill
@@ -67,7 +67,7 @@ for Claude to run. The full guide is for in-depth reviews, takes longer, and cos
   <Step title="Index both style guide versions">
     Run the following command to index both documents:
 
-    ```text
+    ```plaintext
     /docs-manage Index the following style guide documentation:
     - https://raw.githubusercontent.com/cjobermaier/public-resources/main/style-guide/style-guide.md --library full-style-guide
     - https://raw.githubusercontent.com/cjobermaier/public-resources/main/style-guide/style-guide-quick-reference.md --library quick-style-guide
@@ -79,13 +79,13 @@ for Claude to run. The full guide is for in-depth reviews, takes longer, and cos
   <Step title="Verify both are indexed">
     Confirm the index contains both libraries:
 
-    ```text
+    ```plaintext
     /docs-manage List the full-style-guide and quick-style-guide libraries
     ```
 
     You see both style guide libraries in the output:
 
-    ```text
+    ```plaintext
     ⏺ Here are the two style guide libraries:
 
       full-style-guide
@@ -119,7 +119,7 @@ This tutorial demonstrates the quick check. You install both skills so the full-
   <Step title="Install the quick-style-guide skill">
     Ask Claude to download the skill file:
 
-    ```text
+    ```plaintext
     Download https://raw.githubusercontent.com/cjobermaier/public-resources/main/skills/quick-style-guide/SKILL.md to ~/.claude/skills/quick-style-guide/SKILL.md
     ```
   </Step>
@@ -127,7 +127,7 @@ This tutorial demonstrates the quick check. You install both skills so the full-
   <Step title="Install the full-style-guide skill">
     Ask Claude to download the skill file:
 
-    ```text
+    ```plaintext
     Download https://raw.githubusercontent.com/cjobermaier/public-resources/main/skills/full-style-guide/SKILL.md to ~/.claude/skills/full-style-guide/SKILL.md
     ```
   </Step>
@@ -150,19 +150,21 @@ This tutorial demonstrates the quick check. You install both skills so the full-
 
 ## Run the quick style guide
 
+To check a document, run `/quick-style-guide <filename>`. Claude searches the indexed style guide for applicable rules, scans your document line by line, and returns findings grouped by severity — each with the line number, the rule it violates, and a suggested fix. Every finding traces back to a specific rule in the indexed style guide.
+
 With the index and skills in place, you run the quick check against a document that contains intentional violations. The file `test-style-guide.md` contains seeded violations across all different severity levels.
 
 <Steps>
   <Step title="Run the quick style check">
     Ask Claude to check the test document:
 
-    ```text
+    ```plaintext
     /quick-style-guide test-style-guide.md
     ```
 
     Claude searches the `quick-style-guide` index for the relevant rules, scans the document, and returns findings grouped by severity.
 
-    ```text
+    ```plaintext
   Critical issues
 
   - Line 1 — Heading sentence case: "Fact-Checking Your React Tutorials with AI" uses title case → Fact-checking your React tutorials with AI ("React" and "AI" stay capitalized as proper
@@ -190,7 +192,7 @@ With the index and skills in place, you run the quick check against a document t
   <Step title="Review the auto-fixable summary">
     At the end of the report, Claude lists all auto-fixable violations and asks if you want to apply the fixes.
 
-    ```text
+    ```plaintext
     Apply all the auto-fixes to test-style-guide.md
     ```
   </Step>
@@ -198,7 +200,7 @@ With the index and skills in place, you run the quick check against a document t
   <Step title="Re-run the check to confirm the fixes">
     Run the quick style check a second time against the same file:
 
-    ```text
+    ```plaintext
     /quick-style-guide test-style-guide.md
     ```
   </Step>
