@@ -7,6 +7,11 @@
     "light": "#a5b4fc",
     "dark": "#4f46e5"
   },
+  "analytics": {
+    "ga4": {
+      "measurementId": "G-MT8MGCN3TQ"
+    }
+  },
   "topbarCtaButton": {
     "name": "First tutorial",
     "url": "/tutorials/increase-content-accuracy"
