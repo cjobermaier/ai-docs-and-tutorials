@@ -32,7 +32,8 @@ mintlify dev     # starts local preview at localhost:3000
 - `get-started.mdx` — environment setup page (file exists but is **not in the nav**)
 - `guides/` — conceptual setup guides (e.g. `setup-grounded-docs.mdx`)
 - `tutorials/` — step-by-step tutorials
-- `public/examples/` — demo files that tutorials reference; users fact-check or edit these as part of the tutorial workflow
+
+Demo files that tutorials reference (the raw material users fact-check or edit) live in the separate [cjobermaier/public-resources](https://github.com/cjobermaier/public-resources) GitHub repo, not in this repo. Tutorials instruct users to `curl` the relevant file into a local working directory before running commands.
 
 Navigation is manually configured in `docs.json` under `navigation.groups`. Adding a new page requires a matching entry there.
 
@@ -45,7 +46,7 @@ Tutorials on this site teach AI-assisted documentation workflows using two Claud
 
 These skills live in `~/.claude/skills/` (global, not in this repo). `guides/setup-grounded-docs.mdx` is the setup guide users follow before starting any tutorial.
 
-Demo files in `public/examples/` are the raw materials users work on during tutorials. A tutorial might have users fact-check `public/examples/react-18-forwardref-tutorial.md` against indexed versioned docs, then update the deprecated code — that updated file is `public/examples/react-19-forwardref-tutorial.md`.
+Demo files live in the [cjobermaier/public-resources](https://github.com/cjobermaier/public-resources) GitHub repo, organized by tutorial slug (e.g. `increase-content-accuracy/react-18-forwardref-tutorial.md`). A tutorial has users `curl` the file into a local working directory, fact-check it against indexed versioned docs, then update the deprecated code in place.
 
 ## Planned features
 
