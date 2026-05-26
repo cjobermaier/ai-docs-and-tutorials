@@ -1,0 +1,261 @@
+---
+title: Check your docs against a style guide
+description: "Index a style guide into Grounded Docs, build a skill for it, and use it to catch style violations in your content."
+---
+
+Style guide violations are easy to miss when you are close to your own writing. This tutorial shows you how to give Claude a specific, versioned style guide so its feedback is grounded in actual rules, not general writing preferences.
+
+You index the HashiCorp style guide into Grounded Docs, create two skills that know how to run checks against it, and then run a check on a document with intentional violations.
+
+## Prerequisites
+
+<CardGroup cols={2}>
+  <Card title="Set up your environment" icon="screwdriver-wrench">
+    You need a CLAUDE.md or AGENTS.md file in your repo before starting.
+  </Card>
+  <Card title="Set up Grounded Docs" icon="database" href="/guides/setup-grounded-docs">
+    Grounded Docs must be installed and the Claude skills must be in place.
+  </Card>
+</CardGroup>
+
+## Index the style guides
+
+The HashiCorp style guide ships in two forms: a full reference with detailed rationale and examples, and a machine-optimized quick reference with rules tagged by priority and fix type. You index both so you can use whichever is appropriate for the task.
+
+<Steps>
+  <Step title="Index both style guide versions">
+    Run the following command to index both documents:
+
+    ```
+    /docs-manage Index the following style guide documentation:
+    - https://raw.githubusercontent.com/hashicorp/web-unified-docs/refs/heads/main/content/well-architected-framework/docs/templates/styleguide.md --library full-style-guide
+    - https://raw.githubusercontent.com/hashicorp/web-unified-docs/refs/heads/main/content/well-architected-framework/docs/templates/styleguide-quick-reference.md --library quick-style-guide
+    ```
+
+    Claude crawls both URLs and stores the content locally. The quick reference indexes in seconds. The full guide takes slightly longer.
+  </Step>
+
+  <Step title="Verify both are indexed">
+    Confirm the index contains both libraries:
+
+    ```
+    /docs-manage List everything in the docs index
+    ```
+
+    You see both style guide libraries in the output:
+
+    | Library | Docs | Status |
+    |---------|------|--------|
+    | full-style-guide | 30+ | ✅ completed |
+    | quick-style-guide | 8 | ✅ completed |
+  </Step>
+</Steps>
+
+## Create the skills
+
+Skills teach Claude how to use indexed documentation. You create one skill for quick checks and one for deep reviews.
+
+<Steps>
+  <Step title="Create the quick-style-guide skill">
+    Create the file `~/.claude/skills/quick-style-guide/SKILL.md` with the following content:
+
+    ```markdown
+    ---
+    name: quick-style-guide
+    description: >-
+      Run a quick HashiCorp style check on a file or pasted content.
+      Uses the machine-optimized quick-reference rules (priority-tagged,
+      auto-fix vs manual). Reports violations grouped by severity.
+      Pass a file path or paste content directly.
+    ---
+
+    # Quick Style Guide Check
+
+    Run the HashiCorp style quick-reference against a document and report violations.
+
+    ## Instructions
+
+    1. If the user provided a file path, read it. Otherwise use the pasted content.
+    2. Use the `docs-search` skill to query `quick-style-guide` for relevant rule
+       categories as you work through the document. Search for specific topics as
+       needed (e.g. "active voice", "passive voice", "latin phrases", "tense").
+    3. Scan the content against the rules. Focus on **[CRITICAL]** and
+       **[IMPORTANT]** priority rules first, then **[STANDARD]**.
+    4. Report findings in this format:
+
+    ---
+
+    ### Critical issues
+    - **Line N** — _Rule name_: description of the violation → suggested fix
+
+    ### Important issues
+    - **Line N** — _Rule name_: description → suggested fix
+
+    ### Standard issues
+    - **Line N** — _Rule name_: description → suggested fix
+
+    ### Auto-fixable summary
+    List every [AUTO-FIX] violation with a one-line fix so the user can batch-apply them.
+
+    ---
+
+    5. If there are no violations in a category, omit that section.
+    6. End with a short summary: total issues found, how many are auto-fixable.
+
+    ## Tips
+
+    - For [AUTO-FIX] items, show the exact before/after text.
+    - For [MANUAL] items, explain *why* it violates the rule, not just what to change.
+    - If the user passes `--fix`, apply all [AUTO-FIX] corrections directly to the
+      file (or return the corrected text if content was pasted).
+    ```
+  </Step>
+
+  <Step title="Create the full-style-guide skill">
+    Create the file `~/.claude/skills/full-style-guide/SKILL.md` with the following content:
+
+    ```markdown
+    ---
+    name: full-style-guide
+    description: >-
+      Run a comprehensive HashiCorp style check on a file or pasted content.
+      Uses the full style guide with detailed examples and rationale.
+      Best for deep reviews, edge cases, or when you need the full rule context.
+      Pass a file path or paste content directly.
+    ---
+
+    # Full Style Guide Check
+
+    Run the complete HashiCorp style guide against a document with full rule context
+    and examples.
+
+    ## Instructions
+
+    1. If the user provided a file path, read it. Otherwise use the pasted content.
+    2. Use the `docs-search` skill to query `full-style-guide` for relevant rules
+       as you work through the document. Search by category or specific concern
+       (e.g. "active voice examples", "link text guidelines", "alert callout usage").
+       Pull the full rule context and examples for each violation you find.
+    3. Scan the content thoroughly across all style categories:
+       - Voice and point of view
+       - Tense and time references
+       - Word choice and simplicity
+       - Grammar and punctuation
+       - Headings and titles
+       - Links
+       - Alerts and callouts
+       - Code blocks and commands
+       - Formatting and markdown
+       - Numbers, dates, and time
+    4. Report findings with full context in this format:
+
+    ---
+
+    ### Critical issues
+    - **Line N** — _Rule name_
+      - **Found:** exact quote from the document
+      - **Rule:** explanation of the rule with rationale
+      - **Fix:** corrected version
+
+    ### Important issues
+    - (same format)
+
+    ### Standard issues
+    - (same format)
+
+    ### Auto-fixable summary
+    A consolidated list of every [AUTO-FIX] item with exact before/after replacements.
+
+    ---
+
+    5. Omit sections with no violations.
+    6. Cite specific examples from the style guide where helpful.
+    7. End with:
+       - Total issues (critical / important / standard)
+       - Count of auto-fixable vs manual-review items
+       - One sentence on the document's overall style health
+
+    ## Tips
+
+    - Use `docs-search` multiple times — search by rule category as you review each
+      section of the document rather than one broad query upfront.
+    - When a violation has a nuanced fix, show two or three alternative rewrites.
+    - If the user passes `--fix`, apply all [AUTO-FIX] corrections directly to the
+      file (or return the corrected text if content was pasted).
+    - For large documents, process section by section and summarize at the end.
+    ```
+  </Step>
+</Steps>
+
+## Run the style check
+
+With the index and skills in place, you run the quick check against a document that contains intentional violations. The file `public/examples/test-styleguide.md` was written with 10 known violations for you to find.
+
+<Steps>
+  <Step title="Run the quick style check">
+    Ask Claude to check the test document:
+
+    ```
+    /quick-style-guide public/examples/test-styleguide.md
+    ```
+
+    Claude searches the `quick-style-guide` index for the relevant rules, scans the document, and returns findings grouped by severity.
+
+    You see violations in three categories. The critical findings include:
+
+    ```
+    ### Critical issues
+    - **Line 2** — *Latin phrases*: `via` → use "through" or "using"
+    - **Line 7** — *Present tense*: `you will learn` → `you learn`
+    - **Line 7** — *Simplest word*: `utilize` → `use`
+    - **Line 8** — *Editorializing*: `Simply` → remove entirely
+    - **Line 24** — *Latin phrases*: `e.g.` → use "for example"
+    - **Line 33** — *Lets not enables*: `allows you to` → `lets you`
+    ```
+
+    Notice that each finding includes the line number, the rule it violates, and a suggested fix. You can trace every finding back to a specific rule in the indexed style guide.
+
+    <Tip>
+      The quick check uses `[CRITICAL]`, `[IMPORTANT]`, and `[STANDARD]` priority tags from the indexed quick reference. Critical issues are violations Claude can identify with high confidence. Fix these first.
+    </Tip>
+  </Step>
+
+  <Step title="Review the auto-fixable summary">
+    At the end of the report, Claude lists all auto-fixable violations in a table:
+
+    | Line | Before | After |
+    |------|--------|-------|
+    | 2 | `via automated analysis` | `through automated analysis` |
+    | 7 | `you will learn how to utilize` | `you learn how to use` |
+    | 8 | `Simply follow` | `Follow` |
+    | 17 | `3 steps` | `three steps` |
+    | 19 | `in order to index` | `to index` |
+    | 24 | `e.g. as searchable chunks` | `for example, as searchable chunks` |
+    | 33 | `allows you to verify` | `lets you verify` |
+
+    Auto-fixable violations are ones where the rule is a direct word or phrase swap with no ambiguity. You can ask Claude to apply them all at once:
+
+    ```
+    Apply all the auto-fixes to public/examples/test-styleguide.md
+    ```
+  </Step>
+
+  <Step title="Re-run to confirm">
+    After applying the fixes, re-run the check to confirm the violations are gone:
+
+    ```
+    /quick-style-guide public/examples/test-styleguide.md
+    ```
+
+    The critical and auto-fixable issues no longer appear. Only the manual issues remain for you to review and rewrite by hand.
+  </Step>
+</Steps>
+
+## When to use each skill
+
+| Skill | When to use |
+|-------|-------------|
+| `/quick-style-guide` | Fast pass before publishing. Catches common violations in seconds. |
+| `/full-style-guide` | Deep review for important pages. Includes full rule rationale and multiple rewrite options. |
+
+Use the quick check as part of your regular writing workflow. Use the full check when you need to understand *why* something violates the style guide, or when you are onboarding a new type of content.

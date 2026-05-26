@@ -7,7 +7,7 @@ AI can review your code, documents, and tutorials for inaccuracies, content that
 However, you don't know what source your AI is using when reviewing your content. Your AI could be using documentation that is several
 years old, resulting in either false positives, or completely missing deprecated content.
 
-In this tutorial, you will learn how to provide your AI with versioned documentation to fact-check your content. You will use Grounded Docs to index two versions 
+In this tutorial, you learn how to provide your AI with versioned documentation to fact-check your content. You use Grounded Docs to index two versions
 of the React documentation, enhance the `docs-search` skill to produce citation-backed findings, and update deprecated code based on the latest documentation.
 
 ## Prerequisites
@@ -45,7 +45,7 @@ How can you be sure that Claude is using the correct version of the React docs? 
 of React that you aren't using? What if it's using outdated information from its training data? You have no way to verify the source, so you can't trust the review.
 
 
-To improve the accuracy of AI reviews, you will provide versioned documentation to your AI. 
+To improve the accuracy of AI reviews, you provide versioned documentation to your AI.
 
 ## Indexing versioned documentation with Grounded Docs
 
@@ -65,7 +65,7 @@ To improve the accuracy of AI reviews, you will provide versioned documentation 
     For the React docs, the URL changes for past versions. Verify the correct URLs for the versions you want to index.
     </Note>
 
-    Claude will crawl both sites and store the content locally. Allow each permission prompt as it runs. 
+    Claude crawls both sites and stores the content locally. Allow each permission prompt as it runs.
     Indexing time varies depending on the size of the documentation and your hardware.
   </Step>
 
@@ -76,7 +76,7 @@ To improve the accuracy of AI reviews, you will provide versioned documentation 
     Use the /docs-manage skill to list the React documentation versions.
     ```
 
-    You will see React docs versions 19.2.0 and 18.3.1 in the table:
+    The table shows React docs versions 19.2.0 and 18.3.1:
 
     | Version | Source | Pages | Status |
     |---------|--------|-------|--------|
@@ -90,10 +90,10 @@ To improve the accuracy of AI reviews, you will provide versioned documentation 
 
 <Steps>
   <Step title="Enhance the docs-search skill">
-    By default, the `docs-search` skill returns generic AI output. You will enhance it so 
+    By default, the `docs-search` skill returns generic AI output. You enhance it so
     Claude produces structured, citation-backed findings.
 
-    Claude will update the `docs-search` skill to include:
+    Claude updates the `docs-search` skill to include:
     1. Doc path (local): the path portion of the URL from the indexed content, labeled as (local) to indicate it came from the local index.
     2. Public URL: The full URL from the indexed content.
     3. Quote: A verbatim excerpt from the content that supports or refutes the claim.
@@ -150,11 +150,11 @@ To improve the accuracy of AI reviews, you will provide versioned documentation 
     against the react v18.3.1 documentation.
     ```
 
-    Claude will return multiple findings with citations from the React 18.3.1 docs. 
+    Claude returns multiple findings with citations from the React 18.3.1 docs.
     
-    You should see a finding for  `forwardRef` pattern and that it is supported and accurately described in the tutorial:
+    The findings include one for the `forwardRef` pattern, confirming it is supported and accurately described in the tutorial:
 
-    The `forwardRef` pattern is valid in React 18, so you should see it pass:
+    The `forwardRef` pattern is valid in React 18, so it passes:
 
     ```
     Doc path (local): /reference/react/forwardRef
@@ -167,7 +167,7 @@ To improve the accuracy of AI reviews, you will provide versioned documentation 
 
     This is the baseline. The tutorial is correct for readers on React 18.
 
-    A summary of all the findings will look similar to the following:
+    A summary of all the findings looks similar to the following:
 
     | Claim | Verdict |
     |-------|---------|
@@ -235,9 +235,9 @@ To improve the accuracy of AI reviews, you will provide versioned documentation 
     using the react v19.2 docs.
     ```
 
-    Claude will show you the code that it wants to update. You can review the change and accept it.
+    Claude shows you the code it wants to update. You can review the change and accept it.
 
-    Claude will update the code and give you a summary of all the changes it made:
+    Claude updates the code and gives you a summary of all the changes it made:
 
     | Location | Before | After |
     |----------|--------|-------|
@@ -266,7 +266,7 @@ To improve the accuracy of AI reviews, you will provide versioned documentation 
     against the react v19.2 documentation.
     ```
 
-    Claude will give a summary of all the findings again, and you should see that the forwardRef deprecation is no longer an issue:
+    Claude gives a summary of all the findings again, and the forwardRef deprecation no longer appears:
 
     | Claim | Verdict |
     |-------|---------|
@@ -277,9 +277,9 @@ To improve the accuracy of AI reviews, you will provide versioned documentation 
     | ref is a built-in prop in React 19, no wrapper needed | ✅ |
     | useRef(null) starts as null until mount | ✅ |
 
-  All 6 claims pass against React 19.2.
+  All six claims pass against React 19.2.
   </Step>
 </Steps>
 
-In this tutorial, you learned how to use Grounded Docs to index versioned documentation and enhance your AI's fact-checking capabilities with citation-backed findings.
-By providing your AI with specific, up-to-date sources, you can significantly improve the accuracy and reliability of its reviews, ensuring your content is always aligned with the latest information.
+In this tutorial, you learned how to use Grounded Docs to index versioned documentation. You enhanced your AI's fact-checking capabilities with citation-backed findings.
+Providing your AI with specific, up-to-date sources significantly improves the accuracy and reliability of its reviews. Your content stays aligned with the latest information.
