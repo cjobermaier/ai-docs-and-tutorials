@@ -88,7 +88,7 @@ description: "Install and configure the Grounded Docs documentation indexer and 
     1. **Doc path (local):** the path portion of the URL from the indexed content, labeled as (local) to indicate it came from the local index.
     2. **Public URL:** The full URL from the indexed content.
     3. **Quote:** A verbatim excerpt from the content that supports or refutes the claim.
-    4. **Finding:** A classification of the claim based on the content.
+    4. **Finding:** A classification of the claim based on the content, ending with a severity emoji (✅ accurate, ⚠️ outdated or imprecise, ❌ incorrect, ❓ not found).
 
     With this format in place, you can see exactly where Claude is pulling its information from,
     read the relevant passage directly, and evaluate each finding against the evidence.
@@ -119,6 +119,12 @@ description: "Install and configure the Grounded Docs documentation indexer and 
     - [DOCS SAY] — a direct quote from content supports the claim
     - [INFERRED from <doc path>] — deduced from context; name source
     - [NOT FOUND] — no indexed source addresses the claim
+
+    Severity emoji (end every Finding line with exactly one):
+    ✅  accurate — docs confirm the claim as stated
+    ⚠️  warning — claim is outdated, deprecated, or imprecise
+    ❌  incorrect — docs directly contradict the claim
+    ❓  unknown — no indexed source found ([NOT FOUND] only)
 
     Rules:
     - Quote must be verbatim from content — never paraphrase
