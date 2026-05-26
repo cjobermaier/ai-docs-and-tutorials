@@ -14,9 +14,6 @@ description: "Install and configure the Grounded Docs documentation indexer and 
   <Card title="git" icon="code-branch">
     Required to clone the skills repository
   </Card>
-  <Card title="Claude Code" icon="terminal">
-    With a CLAUDE.md or AGENTS.md in your project
-  </Card>
 </CardGroup>
 
 ## Install Grounded Docs
@@ -35,66 +32,30 @@ description: "Install and configure the Grounded Docs documentation indexer and 
     <Warning>
       If you've run this setup before and customized any SKILL.md files (for example, the fact-check enhancement from the [versioned-docs tutorial](/tutorials/increase-content-accuracy)), back them up first — the copy commands below overwrite without asking.
 
-      <Tabs>
-        <Tab title="macOS / Linux / WSL">
-          ```bash
-          cp -r ~/.claude/skills ~/.claude/skills.backup
-          ```
-        </Tab>
-        <Tab title="Windows PowerShell">
-          ```powershell
-          Copy-Item -Recurse $env:USERPROFILE\.claude\skills $env:USERPROFILE\.claude\skills.backup
-          ```
-        </Tab>
-      </Tabs>
+      ```bash
+      cp -r ~/.claude/skills ~/.claude/skills.backup
+      ```
     </Warning>
 
-    <Tabs>
-      <Tab title="macOS / Linux / WSL">
-        ```bash
-        git clone --depth 1 --filter=blob:none --sparse \
-          https://github.com/arabold/docs-mcp-server.git /tmp/docs-mcp-server
-        cd /tmp/docs-mcp-server && git sparse-checkout set skills
+    ```bash
+    git clone --depth 1 --filter=blob:none --sparse \
+      https://github.com/arabold/docs-mcp-server.git /tmp/docs-mcp-server
+    cd /tmp/docs-mcp-server && git sparse-checkout set skills
 
-        mkdir -p ~/.claude/skills/docs-manage \
-                 ~/.claude/skills/docs-search \
-                 ~/.claude/skills/fetch-url
+    mkdir -p ~/.claude/skills/docs-manage \
+             ~/.claude/skills/docs-search \
+             ~/.claude/skills/fetch-url
 
-        cp /tmp/docs-mcp-server/skills/docs-manage/SKILL.md \
-           ~/.claude/skills/docs-manage/SKILL.md
-        cp /tmp/docs-mcp-server/skills/docs-search/SKILL.md \
-           ~/.claude/skills/docs-search/SKILL.md
-        cp /tmp/docs-mcp-server/skills/fetch-url/SKILL.md \
-           ~/.claude/skills/fetch-url/SKILL.md
+    cp /tmp/docs-mcp-server/skills/docs-manage/SKILL.md \
+       ~/.claude/skills/docs-manage/SKILL.md
+    cp /tmp/docs-mcp-server/skills/docs-search/SKILL.md \
+       ~/.claude/skills/docs-search/SKILL.md
+    cp /tmp/docs-mcp-server/skills/fetch-url/SKILL.md \
+       ~/.claude/skills/fetch-url/SKILL.md
 
-        # clean up the temp clone
-        rm -rf /tmp/docs-mcp-server
-        ```
-      </Tab>
-      <Tab title="Windows PowerShell">
-        ```powershell
-        git clone --depth 1 --filter=blob:none --sparse `
-          https://github.com/arabold/docs-mcp-server.git $env:TEMP\docs-mcp-server
-        Set-Location $env:TEMP\docs-mcp-server
-        git sparse-checkout set skills
-
-        New-Item -ItemType Directory -Force -Path `
-          $env:USERPROFILE\.claude\skills\docs-manage, `
-          $env:USERPROFILE\.claude\skills\docs-search, `
-          $env:USERPROFILE\.claude\skills\fetch-url
-
-        Copy-Item $env:TEMP\docs-mcp-server\skills\docs-manage\SKILL.md `
-          $env:USERPROFILE\.claude\skills\docs-manage\SKILL.md
-        Copy-Item $env:TEMP\docs-mcp-server\skills\docs-search\SKILL.md `
-          $env:USERPROFILE\.claude\skills\docs-search\SKILL.md
-        Copy-Item $env:TEMP\docs-mcp-server\skills\fetch-url\SKILL.md `
-          $env:USERPROFILE\.claude\skills\fetch-url\SKILL.md
-
-        # clean up the temp clone
-        Remove-Item -Recurse -Force $env:TEMP\docs-mcp-server
-        ```
-      </Tab>
-    </Tabs>
+    # clean up the temp clone
+    rm -rf /tmp/docs-mcp-server
+    ```
 
     Each skill teaches Claude a different capability:
 

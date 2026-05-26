@@ -3,11 +3,11 @@ title: Fact-check tutorials with versioned docs
 description: "Use Grounded Docs to index versioned documentation, fact-check tutorials with Claude, and catch deprecated code using verbatim quotes and source URLs."
 ---
 
-AI can review your code, documents, and tutorials for inaccuracies, content that isn't clear or misrepresented, and other issues.
+AI can review your code, documents, and tutorials for inaccuracies.
 However, you don't know what source your AI is using when reviewing your content. If it's pulling from old documentation, it could
 approve patterns that have since been deprecated, or miss new ones that should be flagged.
 
-In this tutorial, you learn how to provide your AI with versioned documentation to fact-check your content. You use Grounded Docs — a local documentation indexer — to index two versions
+In this tutorial, you learn how to provide your AI with versioned documentation to fact-check your content. You use Grounded Docs, a local documentation indexer, to index two versions
 of React's docs, configure Claude to back each finding with a verbatim quote and source URL, then use those findings to update deprecated code.
 
 ## Prerequisites
@@ -15,10 +15,6 @@ of React's docs, configure Claude to back each finding with a verbatim quote and
 <Card title="Set up Grounded Docs" icon="database" href="/guides/setup-grounded-docs">
   Grounded Docs must be installed and the Claude skills must be in place.
 </Card>
-
-<Note>
-  Grounded Docs requires **Node.js 22+**. Run `node --version` to confirm before starting.
-</Note>
 
 ## The problem with generic AI review
 
@@ -44,30 +40,19 @@ How can you be sure that Claude is using the correct version of the React docs? 
 of React that you aren't using? What if it's using outdated information from its training data? You have no way to verify the source, so you can't trust the review.
 
 
-To improve the accuracy of AI reviews, you provide versioned documentation to your AI.
+When you provide versioned documentation to your AI, it can fact-check content against specific versions, ensuring accuracy and relevance.
 
 ## Set up the tutorial file
 
 <Steps>
   <Step title="Create a working directory">
-    In your terminal, create a directory for this tutorial and download the React 18 `forwardRef` tutorial file:
+    In your terminal, create a directory for this tutorial and download the React 18 demo tutorial file:
 
-    <Tabs>
-      <Tab title="macOS / Linux / WSL">
-        ```bash
-        mkdir -p versioned-docs-tutorial
-        cd versioned-docs-tutorial
-        curl -O https://raw.githubusercontent.com/cjobermaier/public-resources/main/increase-content-accuracy/react-18-forwardref-tutorial.md
-        ```
-      </Tab>
-      <Tab title="Windows PowerShell">
-        ```powershell
-        New-Item -ItemType Directory -Path versioned-docs-tutorial
-        Set-Location versioned-docs-tutorial
-        Invoke-WebRequest -OutFile react-18-forwardref-tutorial.md https://raw.githubusercontent.com/cjobermaier/public-resources/main/increase-content-accuracy/react-18-forwardref-tutorial.md
-        ```
-      </Tab>
-    </Tabs>
+    ```bash
+    mkdir -p versioned-docs-tutorial
+    cd versioned-docs-tutorial
+    curl -O https://raw.githubusercontent.com/cjobermaier/public-resources/main/increase-content-accuracy/react-18-forwardref-tutorial.md
+    ```
   </Step>
 
   <Step title="Launch Claude Code from this directory">
@@ -77,13 +62,26 @@ To improve the accuracy of AI reviews, you provide versioned documentation to yo
     claude
     ```
 
-    Later commands reference `react-18-forwardref-tutorial.md` as a relative path, so Claude must be running from this directory. If you already have a Claude Code session open elsewhere, exit it and start a fresh one here.
+    Later commands reference `react-18-forwardref-tutorial.md` as a relative path, so Claude must be running from this directory.
   </Step>
+  <Step title="Initialize a Claude session">
+    
+    In the Claude Code terminal, initialize Claude so it's aware of the tutorial file:
+
+    ```text
+    /init
+    ```
+  </Step>
+
 </Steps>
 
 ## Indexing versioned documentation with Grounded Docs
 
-In Claude Code, `/docs-manage <prompt>` invokes the docs-manage skill — Claude reads your natural-language instructions and runs the right underlying commands. The same pattern applies to `/docs-search` later in this tutorial.
+Grounded Docs is a local documentation indexer. It indexes documentation on your machine, 
+and makes it searchable. So instead of pulling from training data or the live web, 
+Claude queries your local index and you control exactly which version it references.
+
+The `/docs-manage` skill can index documentation. Use the `/docs-manage` skill to index the React 18.3.1 and React 19.2.0 documentation from react.dev.
 
 <Steps>
   <Step title="Index both React versions">
@@ -97,11 +95,9 @@ In Claude Code, `/docs-manage <prompt>` invokes the docs-manage skill — Claude
     - https://react.dev/reference/react --version 19.2.0
     ```
 
-    <Note>
-    For the React docs, the URL changes for past versions. Verify the correct URLs for the versions you want to index.
-    </Note>
-
-    Claude crawls both sites and stores the content locally. Allow each permission prompt as it runs. If you deny one by mistake, re-run the `/docs-manage` skill.
+    Claude crawls both sites and stores the content locally. Allow each permission prompt as it runs. 
+    If you deny one by mistake, re-run the `/docs-manage` skill.
+    
     Indexing time varies depending on the size of the documentation and your hardware.
   </Step>
 
@@ -109,7 +105,7 @@ In Claude Code, `/docs-manage <prompt>` invokes the docs-manage skill — Claude
     Confirm both versions are ready:
 
     ```text
-    Use the /docs-manage skill to list the React documentation versions.
+    Use the /docs-search skill to list the React documentation versions.
     ```
 
     The table shows React docs versions 19.2.0 and 18.3.1:
@@ -126,14 +122,15 @@ In Claude Code, `/docs-manage <prompt>` invokes the docs-manage skill — Claude
 
 <Steps>
   <Step title="Add the citation block format">
-    By default, the `docs-search` skill returns generic AI output. You enhance it so
-    Claude produces structured, citation-backed findings.
+    By default, the `docs-search` skill has no fact-checking protocol. The CLI returns
+    structured JSON, but Claude's response doesn't cite sources or classify findings.
+    
+    You will enhance the `docs-search` skill so Claude produces the following:
 
-    Claude updates the `docs-search` skill to include:
-    1. Doc path (local): the path portion of the URL from the indexed content, labeled as (local) to indicate it came from the local index.
-    2. Public URL: The full URL from the indexed content.
-    3. Quote: A verbatim excerpt from the content that supports or refutes the claim.
-    4. Finding: A classification of the claim based on the content.
+    1. **Doc path (local):** the path portion of the URL from the indexed content, labeled as (local) to indicate it came from the local index.
+    2. **Public URL:** The full URL from the indexed content.
+    3. **Quote:** A verbatim excerpt from the content that supports or refutes the claim.
+    4. **Finding:** A classification of the claim based on the content.
 
     With this new information, you can understand where Claude is pulling its information from,
     see the relevant information in the documentation,
@@ -175,9 +172,6 @@ In Claude Code, `/docs-manage <prompt>` invokes the docs-manage skill — Claude
     Include a concrete example citation block.
     ```
 
-    <Tip>
-      Review the diff before accepting. Claude should only be adding the new fact-checking workflow and citation format — not rewriting the rest of the SKILL.md.
-    </Tip>
   </Step>
 
   <Step title="Verify the enhancement">
@@ -187,18 +181,26 @@ In Claude Code, `/docs-manage <prompt>` invokes the docs-manage skill — Claude
     /docs-search What citation block format do you use when fact-checking?
     ```
 
-    Claude should describe the four-field format (Doc path, Public URL, Quote, Finding). If it doesn't, re-run the prompt in the previous step.
+    Claude will describe the four-field format (Doc path, Public URL, Quote, Finding). 
   </Step>
 </Steps>
 
 ## Fact-check the tutorial
 
-Fact-checking is the process of scanning a file for claims and verifying each one against indexed documentation. Claude searches the indexed docs for supporting or contradicting text and reports each finding with a verbatim quote and source URL. Your exact quotes and verdicts may differ between runs — focus on the structure and the overall conclusions, not exact wording.
+Claude uses the `/docs-search` skill to search the indexed docs for supporting or contradicting text and reports each finding with a verbatim quote 
+and source URL. Your exact quotes and verdicts may differ between runs, so you should focus on the structure and the overall conclusions, 
+not exact wording.
+
+<Note>
+You fact check the entire file in this tutorial. You can be granular and fact-check individual claims or sections by including specific keywords in your search query. 
+
+For example, you could search for "forwardRef accepts a render function with two arguments: props and ref" to fact-check just that claim.
+</Note>
 
 <Steps>
 
   <Step title="Fact-check against React 18.3.1">
-    Run the docs-search skill to fact-check the tutorial against the React 18.3.1 docs:
+    Run the `/docs-search` skill to fact-check the tutorial against the React 18.3.1 docs:
 
     ```text
     Use the /docs-search skill to fact-check
@@ -210,18 +212,16 @@ Fact-checking is the process of scanning a file for claims and verifying each on
 
     ```text
     Doc path (local): /reference/react/forwardRef
-    Public URL:       https://react.dev/reference/react/forwardRef
+    Public URL:       https://18.react.dev/reference/react/forwardRef
     Quote:            "forwardRef lets your component expose a DOM node
                       to the parent component with a ref."
     Finding:          [DOCS SAY] forwardRef correctly exposes a child's
                       DOM node to a parent. ✅ Accurate
     ```
 
-    This is the baseline. The tutorial is correct for readers on React 18.
-
     A summary of all the findings looks similar to the following:
 
-    | Claim | vs React 18.3.1 |
+    | Claim | React 18.3.1 |
     |-------|-----------------|
     | Refs only work on built-in DOM elements by default | ⚠️ Slightly imprecise — the docs say DOM nodes are private, not that refs fail |
     | React won't forward a ref to a custom component automatically | ✅ Confirmed |
@@ -242,7 +242,9 @@ Fact-checking is the process of scanning a file for claims and verifying each on
     against the react 19.2.0 documentation.
     ```
 
-    This time, Claude flags a deprecation in the `forwardRef` pattern. Notice the Public URL 
+    This time, Claude flags a deprecation in the `forwardRef` pattern. 
+    
+    Notice the Public URL 
     and Doc path point to the location in the React 19.2.0 docs where the deprecation is mentioned. You can 
     click the URL and manually fact-check to confirm the finding:
 
@@ -255,7 +257,7 @@ Fact-checking is the process of scanning a file for claims and verifying each on
     Finding:          [DOCS SAY] ⚠ OUTDATED — forwardRef is deprecated
                       in React 19. The tutorial teaches it as the required
                       pattern, but the 19.2.0 docs explicitly say it is no
-                      longer necessary. ❌ Flagged — breaking change.
+                      longer necessary. ⚠️ Outdated
     ```
 
   Claude identifies that the tutorial is outdated for React 19. The `forwardRef` pattern is now deprecated, 
@@ -266,7 +268,7 @@ Fact-checking is the process of scanning a file for claims and verifying each on
   | Claim | vs React 18.3.1 | vs React 19.2.0 |
   |-------|-----------------|---------------|
   | Refs don't auto-forward to custom components | ⚠️ Imprecise | ⚠️ Still true, but fix has changed |
-  | Use forwardRef to expose a DOM node | ✅ Correct | ❌ Deprecated — use ref as a prop instead |
+  | Use forwardRef to expose a DOM node | ✅ Correct | ⚠️  Deprecated — use ref as a prop instead |
   | forwardRef takes a render fn with props and ref | ✅ Correct | ⚠️ Accurate but describes deprecated API |
   | Attach the received ref to the DOM node | ✅ Correct | ⚠️ Concept correct, mechanism changed |
   | useRef(null) starts as null until mount | ✅ Correct | ✅ Correct |
@@ -283,11 +285,17 @@ Fact-checking is the process of scanning a file for claims and verifying each on
     Ask Claude to update the file using the React 19 docs as the authoritative source:
 
     ```text
-    Update the tutorial to fix the deprecated forwardRef usage,
-    using the react 19.2.0 docs.
+    Update the tutorial to fix the deprecated `forwardRef` usage,
+    using the React 19.2.0 docs.
     ```
 
     Claude shows you the code it wants to update. You can review the change and accept it.
+
+    <Tip>
+    Click on the image to see a larger version of the code diff.
+    </Tip>
+
+    ![Claude Code diff showing the forwardRef pattern replaced with ref as a prop](/images/forwardRef-fix.png)
 
     Claude updates the code and gives you a summary of all the changes it made:
 
@@ -301,12 +309,6 @@ Fact-checking is the process of scanning a file for claims and verifying each on
     | import statement | `import { forwardRef } from 'react'` | removed — no longer needed |
     | How It Works bullets | "forwardRef accepts a render function with two arguments: props and ref" | "ref is a built-in prop in React 19 — no wrapper or special API needed" |
 
-    <Tip>
-      Review the diff before accepting. Claude should only be touching the deprecated patterns and not rewrite the whole file.
-    </Tip>
-
-
-
   </Step>
 
   <Step title="Verify the fix">
@@ -314,8 +316,20 @@ Fact-checking is the process of scanning a file for claims and verifying each on
 
     ```text
     Use the /docs-search skill to fact-check
-    react-18-forwardref-tutorial.md
+    react-18-forwardref-tutorial.md for the deprecated `forwardRef` you just fixed, 
     against the react 19.2.0 documentation.
+    ```
+
+    Claude shows the `forwardRef` claim with a new citation from the React 19.2.0 docs that confirms the fix:
+
+    ```text
+    Doc path (local): /reference/react/forwardRef.md
+    Public URL:       https://react.dev/reference/react/forwardRef.md
+    Quote:            "In React 19, `forwardRef` is no longer necessary. Pass
+                    `ref` as a prop instead."
+    Finding:          [DOCS SAY] ref as a plain prop is the correct React 19
+                    approach. ✅ Accurate
+   
     ```
 
     Claude gives a summary of all the findings again, and the forwardRef deprecation no longer appears:
@@ -329,7 +343,6 @@ Fact-checking is the process of scanning a file for claims and verifying each on
     | ref is a built-in prop in React 19, no wrapper needed | ✅ |
     | useRef(null) starts as null until mount | ✅ |
 
-  All six claims pass against React 19.2.0.
   </Step>
 </Steps>
 

@@ -23,6 +23,6 @@ Finding:          [DOCS SAY] / [INFERRED from <doc path>] / [NOT FOUND]
 **Rules:**
 - `Quote` must be verbatim from `content` — never paraphrase
 - Never use `[DOCS SAY]` without a quote to back it
-- Always use the `(local)` label so it is clear content came from the local index, not a live internet request
+- The `(local)` in `Doc path (local):` is part of the **field label only** — never append it to the path value itself (e.g. write `/vault/docs/auth/approle`, not `/vault/docs/auth/approle (local)`)
 
 Include a concrete example citation block.
