@@ -4,11 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project context
 
-A tutorial and documentation website teaching users how to use AI (primarily Claude) to improve their technical documents and tutorials. Built with Mintlify. Deployed via Mintlify's platform (tutorialguides.mintlify.app).
+A tutorial and documentation website teaching users how to use AI (primarily Claude) to improve their technical documents and tutorials. Built with Mintlify. Deployed via Mintlify's platform (tutorialguides.mintlify.app). Site name: **CJ Teaches**.
 
 - Format: MDX files with YAML frontmatter
 - Config: `docs.json` for navigation, theme, and settings
 - Refer to the [docs.json schema](https://mintlify.com/docs.json) when modifying `docs.json`
+
+> **Note:** `README.md` is stale Astro/Starlight boilerplate from a previous stack. Ignore it entirely.
 
 ## Local development
 
@@ -27,12 +29,27 @@ mintlify dev     # starts local preview at localhost:3000
 ## File structure
 
 - `introduction.mdx` — home/landing page
-- `get-started.mdx` — environment setup
-- `guides/` — conceptual guides
+- `get-started.mdx` — environment setup page (file exists but is **not in the nav**)
+- `guides/` — conceptual setup guides (e.g. `setup-grounded-docs.mdx`)
 - `tutorials/` — step-by-step tutorials
-- `public/examples/` — demo files referenced by tutorials
+- `public/examples/` — demo files that tutorials reference; users fact-check or edit these as part of the tutorial workflow
 
 Navigation is manually configured in `docs.json` under `navigation.groups`. Adding a new page requires a matching entry there.
+
+## Content architecture
+
+Tutorials on this site teach AI-assisted documentation workflows using two Claude skills that users install globally:
+
+- `/docs-manage` — scrape, refresh, and remove docs from a local index (`@arabold/docs-mcp-server`)
+- `/docs-search` — search indexed docs and fact-check content with citation-backed findings
+
+These skills live in `~/.claude/skills/` (global, not in this repo). `guides/setup-grounded-docs.mdx` is the setup guide users follow before starting any tutorial.
+
+Demo files in `public/examples/` are the raw materials users work on during tutorials. A tutorial might have users fact-check `public/examples/react-18-forwardref-tutorial.md` against indexed versioned docs, then update the deprecated code — that updated file is `public/examples/react-19-forwardref-tutorial.md`.
+
+## Planned features
+
+See `TODO.md` for in-progress feature ideas (doc health check skill, before/after scoring).
 
 ## Mintlify components
 
@@ -95,3 +112,4 @@ description: Concise summary for SEO and navigation
 - Use absolute URLs for internal links
 - Include untested code examples
 - Make assumptions — always ask for clarification
+- Trust `README.md` — it is stale boilerplate from a previous stack

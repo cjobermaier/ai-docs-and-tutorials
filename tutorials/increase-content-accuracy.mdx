@@ -1,17 +1,38 @@
 ---
-title: Increase content accuracy
-description: "Use Grounded Docs to index specific documentation versions and fact-check tutorials against them with Claude."
+title: Use versioned docs
+description: "Use Grounded Docs to index documentation versions and fact-check tutorials against them with Claude."
 ---
 
-## The problem with AI fact-checking
+AI can review your code, documents, and tutorials for inaccuracies, content that isn't clear or misrepresented, and other issues.
+However, you don't know what source your AI is using when reviewing your content. Your AI could be using documentation that is several
+years old, resulting in either false positives, or completely missing deprecated content.
 
-It's tempting to ask your AI to review your content for accuracy:
+In this tutorial, you will learn how to provide your AI with versioned documentation to fact-check your content. You will use Grounded Docs to index two versions 
+of the React documentation, enhance the `docs-search` skill to produce citation-backed findings, and update deprecated code based on the latest documentation.
+
+## Prerequisites
+
+<CardGroup cols={2}>
+  <Card title="Set up your environment" icon="screwdriver-wrench">
+    You need a CLAUDE.md or AGENTS.md file in your repo before starting.
+  </Card>
+  <Card title="Set up Grounded Docs" icon="database" href="/guides/setup-grounded-docs">
+    Grounded Docs must be installed and the Claude skills must be in place.
+  </Card>
+</CardGroup>
+
+## The problem with generic AI review
+
+When you ask an AI to review your content, it pulls information from its training data and memory. 
+You have little visibility into the source, so you can't be sure it's using accurate or up-to-date information.
+
+For example, you could ask Claude: 
 
 ```
 Hey Claude, review my React tutorial for accuracy.
 ```
 
-And Claude sounds confident:
+And Claude confidently replies:
 
 ```
 Looks good! The forwardRef pattern is correct — wrapping your component
@@ -20,77 +41,71 @@ initialization is right, and the overall approach follows React best
 practices. ✓
 ```
 
-<Warning>
-  This answer is wrong — and Claude doesn't know it. AI fact-checks content against its training data, which can be outdated, sourced from unreliable places, or simply wrong about enterprise vs. OSS behavior. The more confidently wrong, the harder it is to catch.
-</Warning>
+How can you be sure that Claude is using the correct version of the React docs? What if it's pulling from an older version 
+of React that you aren't using? What if it's using outdated information from its training data? You have no way to verify the source, so you can't trust the review.
 
-The fix is simple: **give your AI the source**. Instead of letting it pull information from memory, point it at the specific versioned docs your readers are actually using.
 
-This tutorial shows how to do that using [Grounded Docs](https://grounded.tools/). You'll index two versions of the React docs, enhance the fact-checking skill to produce citation-backed output, and watch the same tutorial pass one version and fail another.
+To improve the accuracy of AI reviews, you will provide versioned documentation to your AI. 
 
-## Prerequisites
-
-<CardGroup cols={2}>
-  <Card title="Set up your environment" icon="screwdriver-wrench" href="/get-started">
-    You need a CLAUDE.md or AGENTS.md file in your repo before starting.
-  </Card>
-  <Card title="Set up Grounded Docs" icon="database" href="/guides/setup-grounded-docs">
-    Grounded Docs must be installed and the Claude skills must be in place.
-  </Card>
-</CardGroup>
-
-## The example file
-
-This tutorial fact-checks a sample React tutorial at `public/examples/react-18-forwardref-tutorial.md`. It covers forwarding refs to child components using the React 18 pattern:
-
-```jsx
-import { forwardRef } from 'react';
-
-const FancyInput = forwardRef(function FancyInput(props, ref) {
-  return <input ref={ref} className="fancy-input" {...props} />;
-});
-```
-
-This code is valid in React 18 — but deprecated in React 19. That's exactly what you'll catch.
-
-## Steps
+## Indexing versioned documentation with Grounded Docs
 
 <Steps>
   <Step title="Index both React versions">
-    Index both React 18.3.1 and React 19.2 so you can fact-check against either version. In Claude Code, run:
+    Index both React 18.3.1 and React 19.2 so you can fact-check against either version. 
+    
+    Run the following command to have Claude index two versions of the React documentation:
 
     ```
     /docs-manage Index the following two versions of the React documentation:
-    - https://react.dev/reference/react --version 18.3.1
+    - https://18.react.dev/reference/react --version 18.3.1
     - https://react.dev/reference/react --version 19.2
     ```
 
-    Claude will crawl both sites and store the content locally. Allow each permission prompt as it runs. Indexing takes a few minutes per version and covers roughly 49 pages each.
+    <Note>
+    For the React docs, the URL changes for past versions. Verify the correct URLs for the versions you want to index.
+    </Note>
+
+    Claude will crawl both sites and store the content locally. Allow each permission prompt as it runs. 
+    Indexing time varies depending on the size of the documentation and your hardware.
   </Step>
 
   <Step title="Verify both versions are indexed">
     Confirm both versions are ready:
 
     ```
-    Give me a list of the react docs
+    Use the /docs-manage skill to list the React documentation versions.
     ```
 
-    You should see both versions in the table:
+    You will see React docs versions 19.2.0 and 18.3.1 in the table:
 
-    | Library | Version | Pages |
-    |---------|---------|-------|
-    | react   | 19.2    | 49    |
-    | react   | 18.3.1  | 49    |
+    | Version | Source | Pages | Status |
+    |---------|--------|-------|--------|
+    | 19.2.0 | react.dev/reference/react | 49 pages, 422 docs | ✅ completed |
+    | 18.3.1 | 18.react.dev/reference/react | 45 pages, 307 docs | ✅ completed |
 
-    If only one version appears, re-run the index command for the missing one before continuing.
   </Step>
+</Steps>
 
+## Enhance the docs-search skill
+
+<Steps>
   <Step title="Enhance the docs-search skill">
-    By default, the `docs-search` skill returns generic AI output. You need to enhance it so Claude produces structured, citation-backed findings instead of vague summaries.
+    By default, the `docs-search` skill returns generic AI output. You will enhance it so 
+    Claude produces structured, citation-backed findings.
 
-    Run this prompt:
+    Claude will update the `docs-search` skill to include:
+    1. Doc path (local): the path portion of the URL from the indexed content, labeled as (local) to indicate it came from the local index.
+    2. Public URL: The full URL from the indexed content.
+    3. Quote: A verbatim excerpt from the content that supports or refutes the claim.
+    4. Finding: A classification of the claim based on the content.
 
-    ```
+    With this new information, you can understand where Claude is pulling its information from,
+    see the relevant information in the documentation,
+    and evaluate the accuracy of the claim based on the evidence provided.
+
+    Ask Claude to update the docs-search skill to add this citation format:
+
+    ```text
     Enhance ~/.claude/skills/docs-search/SKILL.md for fact-checking.
     Add a fact-checking workflow and citation block format: when
     fact-checking, search the index, locate the relevant passage in
@@ -98,9 +113,9 @@ This code is valid in React 18 — but deprecated in React 19. That's exactly wh
     block per claim:
 
     Doc path (local): <path portion of the url field — everything
-                      after the domain. Label as "(local)" to make
-                      clear content came from the local index, not
-                      a live fetch.>
+                      after the domain. The "(local)" is part of the
+                      field label only — do not append it to the path
+                      value itself.>
     Public URL:       <full url field value>
     Quote:            "<verbatim excerpt from content>"
     Finding:          [DOCS SAY] / [INFERRED from <doc path>] /
@@ -114,18 +129,20 @@ This code is valid in React 18 — but deprecated in React 19. That's exactly wh
     Rules:
     - Quote must be verbatim from content — never paraphrase
     - Never use [DOCS SAY] without a quote to back it
-    - Always use the (local) label
+    - The field label is "Doc path (local):" — never repeat "(local)"
+      in the path value
 
     Include a concrete example citation block.
     ```
-
-    <Note>
-      This enhancement is permanent — the skill file is updated on disk. You only need to do this once across all tutorials that use `docs-search` for fact-checking.
-    </Note>
   </Step>
+</Steps>
+
+## Fact-check the tutorial
+
+<Steps>
 
   <Step title="Fact-check against React v18.3.1">
-    Now run the fact-check against the React 18 docs:
+    Run the docs-search skill to fact-check the tutorial against the React 18.3.1 docs:
 
     ```
     Use the /docs-search skill to fact-check
@@ -133,10 +150,14 @@ This code is valid in React 18 — but deprecated in React 19. That's exactly wh
     against the react v18.3.1 documentation.
     ```
 
+    Claude will return multiple findings with citations from the React 18.3.1 docs. 
+    
+    You should see a finding for  `forwardRef` pattern and that it is supported and accurately described in the tutorial:
+
     The `forwardRef` pattern is valid in React 18, so you should see it pass:
 
     ```
-    Doc path (local): /reference/react/forwardRef (local)
+    Doc path (local): /reference/react/forwardRef
     Public URL:       https://react.dev/reference/react/forwardRef
     Quote:            "forwardRef lets your component expose a DOM node
                       to the parent component with a ref."
@@ -145,10 +166,23 @@ This code is valid in React 18 — but deprecated in React 19. That's exactly wh
     ```
 
     This is the baseline. The tutorial is correct for readers on React 18.
+
+    A summary of all the findings will look similar to the following:
+
+    | Claim | Verdict |
+    |-------|---------|
+    | Refs only work on built-in DOM elements by default | ⚠️ Slightly imprecise — the docs say DOM nodes are private, not that refs fail |
+    | React won't forward a ref to a custom component automatically | ✅ Confirmed |
+    | forwardRef exposes the DOM node to the parent | ✅ Confirmed |
+    | Render function takes props and ref | ✅ Confirmed |
+    | Attach the ref arg to the DOM element you want to expose | ✅ Confirmed |
+    | useRef(null) starts as null until mount | ✅ Confirmed |
+
   </Step>
 
   <Step title="Fact-check against React v19.2">
-    Now run the same check against the React 19 docs:
+
+    Run the same check against the newer React 19 docs:
 
     ```
     Use the /docs-search skill to fact-check
@@ -156,10 +190,12 @@ This code is valid in React 18 — but deprecated in React 19. That's exactly wh
     against the react v19.2 documentation.
     ```
 
-    This time, the same code gets flagged:
+    This time, Claude flags a deprecation in the `forwardRef` pattern. Notice the Public URL 
+    and Doc path point to location in the React 19.2 docs where the deprecation is mentioned. You can 
+    click the URL and manually fact-check to confirm the finding:
 
     ```
-    Doc path (local): /reference/react/forwardRef (local)
+    Doc path (local): /reference/react/forwardRef
     Public URL:       https://react.dev/reference/react/forwardRef
     Quote:            "In React 19, forwardRef is no longer necessary.
                       Pass ref as a prop instead. forwardRef will be
@@ -170,9 +206,27 @@ This code is valid in React 18 — but deprecated in React 19. That's exactly wh
                       longer necessary. ❌ Flagged — breaking change.
     ```
 
-    Same tutorial, same code — different result depending on which version your readers are on. This is what version-aware fact-checking catches that generic AI review misses.
-  </Step>
+  Claude identifies that the tutorial is outdated for React 19. The `forwardRef` pattern is now deprecated, 
+  and you need to update the tutorial.
 
+  A full summary of all the findings will look similar to the following:
+
+  | Claim | vs React 18.3.1 | vs React 19.2 |
+  |-------|-----------------|---------------|
+  | Refs don't auto-forward to custom components | ⚠️ Imprecise | ⚠️ Still true, but fix has changed |
+  | Use forwardRef to expose a DOM node | ✅ Correct | ❌ Deprecated — use ref as a prop instead |
+  | forwardRef takes a render fn with props and ref | ✅ Correct | ⚠️ Accurate but describes deprecated API |
+  | Attach the received ref to the DOM node | ✅ Correct | ⚠️ Concept correct, mechanism changed |
+  | useRef(null) starts as null until mount | ✅ Correct | ✅ Correct |
+
+
+
+  </Step>
+</Steps>
+
+## Fix the deprecated code
+
+<Steps>
   <Step title="Fix the deprecated code">
     Ask Claude to update the file using the React 19 docs as the authoritative source:
 
@@ -181,19 +235,26 @@ This code is valid in React 18 — but deprecated in React 19. That's exactly wh
     using the react v19.2 docs.
     ```
 
-    Claude will rewrite the component to the React 19 pattern:
+    Claude will show you the code that it wants to update. You can review the change and accept it.
 
-    ```jsx
-    function FancyInput({ ref, ...props }) {
-      return <input ref={ref} className="fancy-input" {...props} />;
-    }
-    ```
+    Claude will update the code and give you a summary of all the changes it made:
 
-    It will also remove the `forwardRef` import, update the surrounding explanation, and add an upgrade callout for readers coming from React 18.
+    | Location | Before | After |
+    |----------|--------|-------|
+    | Title | "Forwarding Refs to Child Components in React" | "Passing Refs to Child Components in React" |
+    | Intro | "React provides forwardRef to make this possible" | "you can do this by accepting ref as a regular prop" |
+    | Problem framing | "ref objects only work on built-in DOM elements" | "components don't expose their DOM nodes to parent components" (matches docs exactly) |
+    | Solution heading | `## The Solution: forwardRef` | `## The Solution: Accept ref as a prop` |
+    | FancyInput component | `forwardRef(function FancyInput(props, ref) { ... })` | `function FancyInput({ ref, ...props }) { ... }` |
+    | import statement | `import { forwardRef } from 'react'` | removed — no longer needed |
+    | How It Works bullets | "forwardRef accepts a render function with two arguments: props and ref" | "ref is a built-in prop in React 19 — no wrapper or special API needed" |
 
     <Tip>
-      Review the diff before accepting. Claude should only be touching the deprecated patterns — not rewriting the whole file.
+      Review the diff before accepting. Claude should only be touching the deprecated patterns and not rewrite the whole file.
     </Tip>
+
+
+
   </Step>
 
   <Step title="Verify the fix">
@@ -205,6 +266,20 @@ This code is valid in React 18 — but deprecated in React 19. That's exactly wh
     against the react v19.2 documentation.
     ```
 
-    All findings should now return `[DOCS SAY]` with no deprecation flags. The tutorial accurately reflects React 19.2 and is ready to publish.
+    Claude will give a summary of all the findings again, and you should see that the forwardRef deprecation is no longer an issue:
+
+    | Claim | Verdict |
+    |-------|---------|
+    | Components don't expose DOM nodes to parents by default | ✅ |
+    | Attaching a ref to a custom component won't auto-forward it | ✅ |
+    | Add ref to props and pass it to the DOM node | ✅ |
+    | `function FancyInput({ ref, ...props })` code example | ✅ |
+    | ref is a built-in prop in React 19, no wrapper needed | ✅ |
+    | useRef(null) starts as null until mount | ✅ |
+
+  All 6 claims pass against React 19.2.
   </Step>
 </Steps>
+
+In this tutorial, you learned how to use Grounded Docs to index versioned documentation and enhance your AI's fact-checking capabilities with citation-backed findings.
+By providing your AI with specific, up-to-date sources, you can significantly improve the accuracy and reliability of its reviews, ensuring your content is always aligned with the latest information.
