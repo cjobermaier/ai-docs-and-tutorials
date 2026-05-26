@@ -1,19 +1,21 @@
-# Passing Refs to Child Components in React
+# Forwarding Refs to Child Components in React
 
-Sometimes a parent component needs direct access to a DOM element inside a child — for example, to call `.focus()` on an input. In React 19, you can do this by accepting `ref` as a regular prop.
+Sometimes a parent component needs direct access to a DOM element inside a child — for example, to call `.focus()` on an input. React provides `forwardRef` to make this possible.
 
 ## The Problem
 
-By default, components don't expose their DOM nodes to parent components. If you try to attach a ref to a custom component, the component won't forward it to the underlying DOM node automatically.
+By default, ref objects only work on built-in DOM elements like `<div>` and `<input>`. If you try to attach a ref to a custom component, React will not forward it to the underlying DOM node automatically.
 
-## The Solution: Accept `ref` as a prop
+## The Solution: `forwardRef`
 
-Add `ref` to the list of props your component accepts and pass it to the DOM node you want to expose:
+Wrap your child component in `forwardRef` to expose its underlying DOM node to the parent:
 
 ```jsx
-function FancyInput({ ref, ...props }) {
+import { forwardRef } from 'react';
+
+const FancyInput = forwardRef(function FancyInput(props, ref) {
   return <input ref={ref} className="fancy-input" {...props} />;
-}
+});
 ```
 
 The parent can now attach a ref and call DOM methods directly:
@@ -40,8 +42,8 @@ export default function Form() {
 
 ## How It Works
 
-- `ref` is a built-in prop in React 19 — no wrapper or special API needed
-- Destructure `ref` from props and pass it to the DOM element you want to expose
+- `forwardRef` accepts a render function with two arguments: `props` and `ref`
+- The `ref` is the ref object passed by the parent — attach it to the DOM element you want to expose
 - `useRef(null)` initializes the ref with `null` until the component mounts
 
-This pattern works any time you need a parent to imperatively control a DOM node inside a child component.
+This pattern is required any time you need a parent to imperatively control a DOM node inside a child component.
