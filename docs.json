@@ -7,7 +7,7 @@
     "light": "#a5b4fc",
     "dark": "#4f46e5"
   },
-  "analytics": {
+  "integrations": {
     "ga4": {
       "measurementId": "G-MT8MGCN3TQ"
     }
