@@ -20,7 +20,7 @@
     "groups": [
       {
         "group": "Getting started",
-        "pages": ["introduction", "guides/setup-grounded-docs"]
+        "pages": ["introduction", "guides/setup-coding-agents", "guides/setup-grounded-docs"]
       },
       {
         "group": "Tutorials",
