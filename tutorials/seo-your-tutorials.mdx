@@ -1,0 +1,174 @@
+---
+title: Improve your SEO and GEO
+description: "Install the claude-seo plugin, run the /seo skill against a tutorial with known SEO issues, and apply targeted improvements to titles, descriptions, headings, and links."
+---
+
+I was going to write this tutorial using a simple SEO skill I wrote a few months ago and have been using at work. However,
+I recently discovered the [claude-seo plugin](https://github.com/AgriciDaniel/claude-seo) by [Agrici Daniel](https://github.com/AgriciDaniel) and was
+completely blown away by its capabilities.
+
+The plug-in runs 18 sub-agents in parallel running 25 sub-skills, and is kicked off with a single skill. It's awesome.
+
+Improving the SEO (Search Engine Optimization) and GEO (Generative Engine Optimization) of your tutorials helps them reach a wider audience and perform better in search results. 
+In this tutorial, you use the claude-seo plugin to audit a tutorial for SEO issues.
+
+Feel free to use your own tutorial file instead of the provided demo.
+
+## Prerequisites
+
+Before starting, install the claude-seo plugin:
+
+<Card title="Install claude-seo" icon="plug" href="https://github.com/AgriciDaniel/claude-seo#installation">
+  The claude-seo plugin must be installed and available in Claude before running this tutorial.
+</Card>
+
+## Set up the tutorial file
+
+<Steps>
+  <Step title="Create a working directory">
+    In your terminal, create a directory for this tutorial and download the demo tutorial file:
+
+    ```bash
+    mkdir -p seo-tutorial
+    cd seo-tutorial
+    curl -O https://raw.githubusercontent.com/cjobermaier/public-resources/main/seo-your-tutorials/demo-tutorial.md
+    ```
+
+    Open `demo-tutorial.md` in your editor to skim the file before running the audit. It contains a realistic-looking tutorial with intentional SEO issues seeded throughout.
+  </Step>
+
+  <Step title="Launch Claude Code from this directory">
+    Start Claude Code from inside `seo-tutorial/`:
+
+    ```bash
+    claude
+    ```
+
+    Later commands reference `demo-tutorial.md` as a relative path, so Claude must be running from this directory.
+  </Step>
+</Steps>
+
+## Run the SEO check
+
+The `/seo` skill audits your file for SEO issues and returns findings across several categories: page title and meta description, heading structure, link text quality, and AI/LLM visibility signals. Each finding includes what to change and why.
+
+<Steps>
+  <Step title="Run the SEO audit">
+    The `/seo` skill accepts a subcommand and a target. Use `page` to analyze a single file or URL, or `audit` to analyze an entire site. Run `page` against the demo file:
+
+    ```plaintext
+    /seo page demo-tutorial.md
+    ```
+
+    Claude scans the file and returns a scorecard followed by a prioritized issue list. The exact output varies, but the structure looks similar to the following:
+
+    ```plaintext
+    Overall Score: 38/100
+
+    On-Page SEO:     32/100  ███░░░░░░░
+    Content Quality: 48/100  █████░░░░░
+    Technical:       45/100  ████░░░░░░
+    Schema:           0/100  ░░░░░░░░░░
+    Images:         N/A
+
+    CRITICAL
+      ✗ Meta description missing — no `description` frontmatter found
+
+    HIGH
+      ✗ Title too generic: "A Guide to Using React Refs"
+          → "Forward refs to child components in React 18 with forwardRef"
+      ✗ H2 "Introduction" is not descriptive
+          → "Why refs don't work on custom components by default"
+      ✗ H2 "The Solution" is vague — doesn't name the API
+          → "Use forwardRef to expose the DOM node"
+      ✗ Link text "click here" (line 51) carries no keyword signal
+          → "useRef API reference in the React docs"
+      ✗ Link text "this page" (line 116) is generic
+          → "Referencing values with refs guide"
+
+    MEDIUM
+      ✗ Opening paragraph never defines forwardRef — the actual topic
+      ✗ H2 "Getting Started" is generic
+
+    LOW
+      ✗ No publication or last-updated date
+      ✗ No author attribution or E-E-A-T signals
+    ```
+
+    Address **Critical** and **High** issues first — they have the most impact on ranking and discoverability. **Medium** and **Low** issues are worth fixing eventually but won't block you.
+  </Step>
+</Steps>
+
+## Implement improvements
+
+You have two approaches depending on how much control you want.
+
+### Apply everything at once
+
+<Steps>
+  <Step title="Apply all improvements">
+    Ask Claude to apply every finding from the audit:
+
+    ```plaintext
+    Apply all the SEO improvements from the audit to demo-tutorial.md.
+    ```
+
+    Claude applies each fix and shows you a diff. Review and accept the changes that make sense for your content. This is the fastest path when you trust the audit findings.
+  </Step>
+
+  <Step title="Re-run the audit to verify">
+    Run the audit again to confirm the Critical and High issues are resolved:
+
+    ```plaintext
+    /seo page demo-tutorial.md
+    ```
+
+    The score will jump significantly. Medium and Low issues may still appear — that's expected. Decide which remaining items are worth addressing.
+  </Step>
+</Steps>
+
+### Plan first, then apply selectively
+
+Use this approach when you want to review changes before committing to them, or when working on real content where some suggestions may not fit your audience.
+
+<Steps>
+  <Step title="Ask Claude for an improvement plan">
+    ```plaintext
+    Create an improvement plan for demo-tutorial.md based on the audit.
+    ```
+
+    Claude returns a ranked list of changes organized by priority, with suggested replacement text for each issue. Review it before applying anything.
+  </Step>
+
+  <Step title="Apply only the items you want">
+    Tell Claude which priority levels to apply:
+
+    ```plaintext
+    Apply the Critical and High priority items from the plan. Skip Medium and Low.
+    ```
+
+    Or name specific categories:
+
+    ```plaintext
+    Apply the title, meta description, and heading fixes. Skip the link text changes.
+    ```
+
+    Claude applies only what you specified and shows a diff for each change.
+  </Step>
+
+  <Step title="Re-run the audit to verify">
+    ```plaintext
+    /seo page demo-tutorial.md
+    ```
+
+    Confirm the items you applied are resolved. The issues you skipped will still appear — that's intentional.
+  </Step>
+</Steps>
+
+## Next steps
+
+You used the claude-seo plugin to audit a tutorial for SEO issues and applied targeted improvements grounded in the plugin's rules.
+
+- Run `/seo` against one of your own tutorials to find issues in real content.
+- Learn how to [fact-check your tutorials against versioned docs](/tutorials/increase-content-accuracy).
+- Learn how to [check your docs against a style guide](/tutorials/style-guide-check).

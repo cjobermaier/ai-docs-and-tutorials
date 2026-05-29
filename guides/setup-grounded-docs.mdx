@@ -27,15 +27,8 @@ description: "Install and configure the Grounded Docs documentation indexer and 
     ```
   </Step>
   <Step title="Install the Claude skills">
-    The Grounded Docs repository ships three Claude skills. Install them so Claude knows how to index and search documentation on your behalf. The command below uses a sparse checkout to grab just the `skills/` directory, not the full repo.
-
-    <Warning>
-      If you've run this setup before and customized any SKILL.md files, back them up first — the copy commands below overwrite without asking.
-
-      ```bash
-      cp -r ~/.claude/skills ~/.claude/skills.backup
-      ```
-    </Warning>
+    The Grounded Docs repository ships three Claude skills. Install them so Claude knows how to index and search documentation on your behalf. 
+    The following command uses a sparse checkout to grab just the `skills/` directory, not the full repo.
 
     ```bash
     git clone --depth 1 --filter=blob:none --sparse \
