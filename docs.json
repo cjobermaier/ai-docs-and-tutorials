@@ -24,7 +24,7 @@
       },
       {
         "group": "Tutorials",
-        "pages": ["tutorials/increase-content-accuracy", "tutorials/style-guide-check"]
+        "pages": ["tutorials/increase-content-accuracy", "tutorials/style-guide-check", "tutorials/seo-your-tutorials"]
       }
     ]
   }
